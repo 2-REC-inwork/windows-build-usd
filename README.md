@@ -1,3 +1,58 @@
+
+TODO:
+=> Make specific OpenEXR/Imath project?
+
+
+OpenEXR/Imath
+
+The parts of "IlmBase" that were Imath and half are now repackaged as the Imath library.
+The IlmThread and Iex libraries have been folded into the OpenEXR package, since they were were not necessary to the rest of Imath.
+
+When building OpenEXR 3.x, note that if Imath 3.x library is not found already installed at build time, it will be automatically downloaded and built as part of the OpenEXR build.
+
+
+Porting guide:
+https://github.com/AcademySoftwareFoundation/Imath/blob/master/docs/PortingGuide2-3.md
+
+Shared/Static
+... (todo)
+
+Python 2/3
+... (todo)
+
+Includes:
+Imath Include Files Are in a Different Subdirectory
+Imath 3.0 will copy its headers to some include/Imath subdirectory instead of the old include/OpenEXR.
+
+
+----
+
+- vfx platform
+  openexr 2.4.x
+
+- oiio
+  - openexr 3.1.1 (?)
+    TODO: check if used
+  - imath 3.1.2
+    ERROR when building USD with OIIO:
+        E:\USD\deps\oiio\x64\Debug\include\OpenImageIO/Imath.h(16,13): fatal error C1083: Cannot open include file: 'Imath/ImathColor.h': No such file or directory [E:\USD\build\pxr\imaging\plugin\hioOiio\hioOiio.vcxproj]
+    ! - Seems that built libraries require the Imath headers, which of course are not present.
+    https://githubmemory.com/repo/AcademySoftwareFoundation/OpenColorIO/issues/1358
+    => OK by adding to build command: (?)
+     -DCMAKE_CXX_FLAGS=-IE:/USD/deps/imath/include
+    where it's the path to the Imath include files...
+
+- ocio
+  imath 3.1.2
+
+- alembic
+  openexr 2.4.3
+
+
+
+===============================================================================================================
+
+
 # USD Windows Build
 
 Help to build the USD project in Windows.
@@ -329,6 +384,7 @@ Version ... 3.4?
 
 (TODO: link to "openexr" page)
 => Same as for Alembic? (and what about OIIO? OCIO?)
+(need to add debug suffix to find libraries in debug build)
 
 
 #### OpenImageIO
@@ -351,6 +407,18 @@ The library has version suffix, not expected by USD.
 => changes (add version suffix if not found) in:
   USD-21.08\cmake\modules\FindOpenColorIO.cmake
 (windows only?)
+
+
+!!!!
+Errors:
+```
+...\USD-21.08\pxr\imaging\hdx\colorCorrectionTask.cpp(154,15):
+ error C2039: 'DisplayTransformRcPtr': is not a member of 'OpenColorIO_v2_0' [...\build\pxr\imaging\hdx\hdx.vcxproj]
+```
+
+Seems not possible for now to build USD with OCIO (?).
+Info on:
+https://github.com/PixarAnimationStudios/USD/issues/1386
 
 
 #### OSL (OpenShadingLanguage)
