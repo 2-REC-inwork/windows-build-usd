@@ -1,0 +1,236 @@
+
+
+TODO:
+
+- OIIO: in debug, lib has suffix "_d", not expected by usd
+  => changes (add "_d" suffix when "debug") in:
+    USD-21.08\cmake\modules\FindOpenImageIO.cmake
+    (TODO: shouldn't it be autmatic?)
+- OCIO: lib has version suffix, not expected by usd
+  => changes (add version suffix if not found) in:
+    USD-21.08\cmake\modules\FindOpenColorIO.cmake
+
+
+
+
+deps:
+- alembic
+  - Requires imath or openexr
+    => decide depending on others?
+    ! => used "ilmbase" v 2.0.0 (as "older" alembic 1.7.x) - OK?
+  (TODO: check that each still applies to current/master)
+  - ...\alembic-1.7.16\cmake\Modules\FindIlmBase.cmake
+    MESSAGE(WARNING "Could not find \"OpenEXRConfig.h\" in \"${ILMBASE_INCLUDE_DIR}\"")
+     => wrong message (filename)
+
+    ELSE()
+      MESSAGE(WARNING "Could not determine ILMBase library version, assuming ${_ilmbase_libs_ver_init}.")
+    => '_ilmbase_libs_ver_init' isn't defined... (?)
+
+    SET("ILMBASE_VERSION" ${_ilmbase_libs_ver_init} CACHE STRING "Version of OpenEXR lib")
+    UNSET(_ilmbase_libs_ver_init)
+    => should be inside:
+      IF(NOT ILMBASE_VERSION)
+
+    FIND_LIBRARY(ALEMBIC_ILMBASE_${UPPERCOMPONENT}_LIB
+      NAMES
+        ${COMPONENT}-${_ilmbase_libs_ver} ${COMPONENT}
+    => '_ilmbase_libs_ver' might not be defined
+  - README
+    -DHDF_ROOT=HDF5Path may need to be specified if HDF5 is not installed in
+    => should be 'DHDF5_ROOT'
+  - boost:
+    C:\Users\2-REC\Documents\alembic\alembic-1.7.16\cmake\AlembicBoost.cmake
+    => find_package boost python needs version if boost >1.63
+  - hdf5 include directory (+lib dir?)
+    => change "PRIVATE" to "PUBLIC"
+
+
+- ilmbase
+  - if win32, no version set in "IlmBaseConfig"!?
+    => modify "CMakeLists.txt"
+
+  - python detection
+    => with order PythonLibs then PythonInterp, seems to not detect python
+    FIX:
+      in
+        ...\PyIlmBase-2.2.0\CMakeLists.txt
+      invert order:
+        FIND_PACKAGE ( PythonInterp REQUIRED )
+        FIND_PACKAGE ( PythonLibs REQUIRED )
+      + suggested in doc:
+        "If calling both find_package(PythonInterp) and find_package(PythonLibs), call find_package(PythonInterp) first to get the currently active Python version by default with a consistent version of PYTHON_LIBRARIES."
+        from:
+        https://cmake.org/cmake/help/latest/module/FindPythonLibs.html
+
+  - can't find NumPy
+    change:
+      FIND_PACKAGE ( NumPy )
+    to:
+      FIND_PACKAGE ( Python COMPONENTS NumPy )
+
+  - include boost directories
+    - headers:
+      INCLUDE_DIRECTORIES (${Boost_INCLUDE_DIR})
+    - lib:
+      LINK_DIRECTORIES (${Boost_LIBRARY_DIRS})
+(+check other changes (?))
+
+  - when static boost, looks for "boost_python..." though should link to "libboost_python..."
+    check woth:
+    add SET(Boost_DEBUG 1) before FIND_PACKAGE and MESSAGE("\${Boost_LIBRARIES} - ${Boost_LIBRARIES}") after FIND_PACKAGE in your CMakeLists.txt. 
+
+
+
+=====================================
+
+
+
+python %LIB_SRC_PATH%\build_scripts\build_usd.py "%BUILD_PATH%"
+
+ --python
+
+(--imaging or --no-imaging)
+ --ptex
+ --openvdb
+ --embree
+ --prman
+ --openimageio
+ --opencolorio
+
+ --usd-imaging
+ --usdview
+
+ --alembic
+ --draco
+ --materialx
+
+
+
+--------------------------------------------------
+
+
+
+-DPXR_PREFER_SAFETY_OVER_SPEED=
+    ON
+    OFF
+
+
+
+--------------------------------------------------
+OK
+-DPXR_ENABLE_PYTHON_SUPPORT=
+    ON
+        -DPXR_USE_PYTHON_3=
+            ON
+            OFF
+
+        -DPYTHON_EXECUTABLE="{pyExecPath}"
+        -DPYTHON_LIBRARY="{pyLibPath}"
+        -DPYTHON_INCLUDE_DIR="{pyIncPath}"
+
+    OFF
+--------------------------------------------------
+OK
+-DBUILD_SHARED_LIBS=
+    ON
+        -DPXR_BUILD_MONOLITHIC=
+            ON
+            OFF
+    OFF
+--------------------------------------------------
+
+
+if debug:
+-DTBB_USE_DEBUG_BUILD=
+    ON
+else:
+-DTBB_USE_DEBUG_BUILD=
+    OFF
+
+
+
+
+
+--------------------------------------------------
+-DPXR_BUILD_DOCUMENTATION=
+    ON
+    OFF
+
+-DPXR_BUILD_TESTS=
+    ON
+    OFF
+
+-DPXR_BUILD_EXAMPLES=
+    ON
+    OFF
+
+-DPXR_BUILD_TUTORIALS=
+    ON
+    OFF
+
+-DPXR_BUILD_USD_TOOLS=
+    ON
+    OFF
+--------------------------------------------------
+
+
+
+-DPXR_BUILD_IMAGING=
+    ON
+        -DPXR_ENABLE_PTEX_SUPPORT=
+            ON
+            OFF
+        -DPXR_ENABLE_OPENVDB_SUPPORT=
+            ON
+            OFF
+        -DPXR_BUILD_EMBREE_PLUGIN=
+            ON
+            OFF
+        -DPXR_BUILD_PRMAN_PLUGIN=
+            ON
+                -DRENDERMAN_LOCATION="{location}"
+            OFF
+        -DPXR_BUILD_OPENIMAGEIO_PLUGIN=
+            ON
+            OFF
+        -DPXR_BUILD_OPENCOLORIO_PLUGIN=
+            ON
+            OFF
+    OFF
+
+
+-DPXR_BUILD_USD_IMAGING=
+    ON
+    OFF
+
+-DPXR_BUILD_USDVIEW=
+    ON
+    OFF
+
+-DPXR_BUILD_ALEMBIC_PLUGIN=
+    ON
+        -DPXR_ENABLE_HDF5_SUPPORT=
+            ON
+                -DHDF5_ROOT="{instDir}"
+            OFF
+    OFF
+
+-DPXR_BUILD_DRACO_PLUGIN=
+    ON
+        -DDRACO_ROOT="{}"
+    OFF
+
+-DPXR_ENABLE_MATERIALX_SUPPORT=
+    ON
+    OFF
+
+!! (specific windows)
+-DCMAKE_CXX_FLAGS="/Zm150"
+
+# Make sure to use boost installed by the build script and not any
+# system installed boost
+-DBoost_NO_BOOST_CMAKE=On
+-DBoost_NO_SYSTEM_PATHS=True
+
+...

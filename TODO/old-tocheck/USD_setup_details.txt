@@ -1,0 +1,577 @@
+# USD Windows Build
+
+(TODO: add short description from Pixar site)
+https://graphics.pixar.com/usd/docs/index.html
+
+This repositroy aims at helping build [USD](https://github.com/PixarAnimationStudios/USD) from source in Windows.
+
+The build process described here is based on the [USD Advanced Build Configuration](https://github.com/PixarAnimationStudios/USD/blob/release/BUILDING.md).
+
+The process is aimed at version 21.08 of USD. Later versions might require changes, but the main process should remain the same.
+
+Tested [versions for 3rd party libraries and applications](https://github.com/PixarAnimationStudios/USD/blob/release/VERSIONS.md) are listed.
+However, even though USD is not part of the [VFX Reference Platform](https://vfxplatform.com/), the software and library versions used in the build process will try to follow the reference (when applicable).
+CY2021 will be used as the annual reference.
+
+
+Keep in mind that USD is not yet fully compatible with Windows, as indicated when executing the configure process:
+```
+CMake Warning at cmake/defaults/ProjectDefaults.cmake:34 (message):
+  Building USD on Windows is currently experimental.
+```
+Some features of USD might not work as expected.
+
+
+----
+
+# Build Environment
+
+## Tools
+
+The software used for the build are the following:
+* Windows 10 (64 bits)
+* Visual Studio 2019 (MSVC142)
+* NASM
+* Python 3
+  * PySide
+  * PyOpenGL
+
+Additional tools and libraries are required by the different modules as specified in the ["Dependencies"](https://github.com/PixarAnimationStudios/USD#dependencies) section of the documentation.
+The process and tools required to build each library is described in the following sections.
+
+
+### Visual Studio
+
+Using Visual Studio 2019 (Community Edition).
+
+The follwoing components should be installed (from the VS Installer tool):
+* Desktop development with C++
+  (default packages)
+  * MSVC v142
+  * Windows 10 SDK v10 (latest)
+  * C++ CMake tools for Windows
+  * ... (TODO: others required?)
+(TODO: needed? or standalone Python is enough?
+* Python Development
+  * Python 3.7.8 (64 bits)
+)
+
+
+### NASM
+
+Required by the "Imaging" and "USD Imaging" modules.
+
+NASM version 2.15.05 (64bits).
+
+- Download from:
+  https://www.nasm.us/
+  Latest when writing this:
+  https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/
+- Extract to:
+  C:\ProgramData\nasm
+- Define "NASMPATH" environment variable (must end with "\" character):
+  NASMPATH=C:\ProgramData\nasm\
+
+(? - needed?
+* VSNASM
+  => To use the build customisation in Visual Studio
+  - Download from:
+    https://github.com/ShiftMediaProject/VSNASM
+    Master branch head:
+    https://github.com/ShiftMediaProject/VSNASM/archive/refs/heads/master.zip
+  - Extract to:
+    C:\ProgramData\vsnasm
+  - Add location in VS2019:
+    "Tools" -> "Options..."
+      "Project and Solutions" -> "VC++ Project Settings"
+        "Build Customization Search Path"
+(TODO: ?
+usage: look at readme on github if needed)
+)
+
+
+### Python
+
+Version 3.7.9 (64 bits).
+...
+
+Some libraries require Python 2.7.
+More details are provided in the sections related to the libraries requiring it.
+
+
+#### PySide
+
+Required by the "USD View" module.
+
+Version 5.15.2.
+
+Install using PIP (run CMD as admin)
+(TODO: specify version)
+```
+pip install PySide2
+```
+or
+```
+python.exe -m pip install PySide2
+```
+
+(TODO: remove (per info purpose, not important here)
+- For offline install:
+  - On computer with Internet connection:
+    - Download using PIP:
+      <python-path>\python.exe -m pip download -d <download-location> PySide2
+    - Copy to shared location (or external device)
+  - On computer without Internet connection:
+    - Get access to shared location (or external device) where the downloaded files are located
+    - Install using PIP (offline):
+      (run CMD as admin)
+      <python-path>\python.exe -m pip install PySide2 --no-index --find-links <download-location>
+)
+
+The location of the PySide binaries also needs to be added to the "PATH" environment variable (additionally to Python's install location):
+```
+set PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%
+```
+If the location is not in "PATH", the build process will not find "pyside-uic.exe" and fail.
+
+
+#### PyOpenGL
+
+Aslo required by the "USD View" module.
+
+Version 3.1.5.
+
+Install using PIP (run CMD as admin)
+(TODO: specify version)
+```
+pip install PyOpenGL
+```
+or
+```
+python.exe -m pip install PyOpenGL
+```
+
+
+## Environment
+
+With the tools installed, additional steps are required to configure the environment for the build.
+The changes to the Windows environment variable "PATH" might not be necessary depending on each individual setup.
+
+
+(TODO: the paths can be different, should not hardcode...)
+* Visual Studio Compiler environment
+  - In a cmd, run "vcvars64.bat" from:
+    C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
+
+* Python
+  Add paths to Python installation and "Scripts" directory to "PATH":
+  ```
+  set PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%
+  ```
+  Where "PYTHON_PATH" is the install location of Python.
+  For example:
+    %USERPROFILE%\AppData\Local\Programs\Python\Python37
+
+* NASM
+  Add path to NASM installation to "PATH":
+  ```
+  set PATH=%NASM_PATH%;%PATH%
+  ```
+  Where "NASM_PATH" is the install location of NASM.
+  For example:
+    C:\ProgramData\nasm
+
+* PySide2 binaries
+  Add paths to PySide2 binaries (essentially "pyside2-uic.exe") to "PATH":
+  ```
+  set PATH=%PYTHON_PATH%\Lib\site-packages;%PATH%
+  ```
+  Typically, PySide2 is installed in Python's "site-packages" directory.
+
+(TODO: needed?
+- PyOpenGL
+  ...
+)
+
+
+----
+
+# Components
+
+(TODO: rewrite...)
+The different components of the USD build.
+more details in "USD-21.08\BUILDING.md".
+
+```
+Building                      Shared|static libraries
+  Config                      Release|Debug
+  Imaging                     On|Off
+    Ptex support:             On|Off
+    OpenVDB support:          On|Off
+    OpenImageIO support:      On|Off
+    OpenColorIO support:      On|Off
+    PRMan support:            On|Off
+  UsdImaging                  On|Off
+    usdview:                  On|Off
+  Python support              On|Off
+    Python 3:                 On|Off
+  Documentation               On|Off
+  Tests                       On|Off
+  Examples                    On|Off
+  Tutorials                   On|Off
+  Tools                       On|Off
+  Alembic Plugin              On|Off
+    HDF5 support:             On|Off
+  Draco Plugin                On|Off
+  MaterialX Plugin            On|Off
+
+Dependencies
+  zlib
+  boost
+  TBB
+  OpenSubdiv
+  PyOpenGL
+```
+)
+
+Requirements:
+(TODO: separate required/optional)
+Boost
+Python
+Jinja2 (python)
+TBB
+OpenGL
+OpenSubdiv
+PTex
+PySide2: with C:/Users/2-REC/AppData/Local/Programs/Python/Python37/python.exe, will use C:/Users/2-REC/AppData/Local/Programs/Python/Python37/Scripts/pyside2-uic.exe for pyside-uic binary
+PyOpenGL
+Alembic
+Draco
+Metal
+Vulkan
+
+
+
+(TODO: check correct - still valid?)
+During the build process, if some dependencies are not found they will be automatically downloaded and built.
+(TODO: check/list which ones)
+
+However, some download links seem to be broken or out of date (especially some links from "SourceForge"), resulting in the process failure.
+A solution is to manually download the dependencies.
+- get files from "build_downloads"
+- copy files to <INSTALL_PATH>/src
+
+! - Had problems downloading files from SourceForge, needed other source.
+
+
+
+
+## Required Components
+
+### Boost
+
+Requires "Boost.Python".
+
+Boost 1.73.0.
+
+(TODO: link to "boost" page)
+=> Same as for Alembic and OIIO?
+
+
+### Jinja2
+
+(Python install with pip)
+
+(TODO: more info...)
+
+
+### TBB
+
+Intel TBB 2020 Update 2.
+****************************************************************************************************
+(TODO: separate TBB page?)
+****************************************************************************************************
+
+
+(files reorganised as for OIIO)
+Found, but warning:
+(TODO: related to TBB or is it a cmake thing?)
+```
+-- Found TBB: C:/Users/2-REC/Documents/USD/deps/tbb/x64/Release/include (found version "2020.2") found components: tbb
+CMake Deprecation Warning at cmake/defaults/Packages.cmake:204 (cmake_policy):
+  The OLD behavior for policy CMP0072 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+Call Stack (most recent call first):
+  CMakeLists.txt:23 (include)
+```
+(TODO: OK?)
+
+
+### OpenSubdiv
+
+Version 3.4.4.
+
+(TODO: link to "opensubdiv" page)
+
+
+## Optional Components
+
+### OpenEXR
+
+Required for OpenImageIO, OpenVDB or OSL support.
+
+Version ... 3.4?
+
+(TODO: link to "openexr" page)
+=> Same as for Alembic? (and what about OIIO? OCIO?)
+
+
+### OpenImageIO
+
+(debug lib name might have "_d" suffix => fix)
+
+(TODO: link to "oiio" page)
+
+
+### OpenColorIO
+
+(lib name might have version suffix => fix)
+
+(TODO: link to "ocio" page)
+
+
+### OSL (OpenShadingLanguage)
+
+https://github.com/AcademySoftwareFoundation/OpenShadingLanguage
+
+****************************************************************************************************
+(TODO: separate OSL page?)
+TODO: EVERYTHING!!!!
+****************************************************************************************************
+
+
+### Alembic
+
+Version 1.7.16.
+
+(TODO: link to "alembic" page)
+
+
+### Ptex
+
+(TODO: link to OIIO/Ptex?)
+
+If building with static libraries, the process will raise linking errors such as:
+```
+ptexTextureObject.obj : error LNK2019: unresolved external symbol
+ "__declspec(dllimport) public: static class Ptex::v2_3::PtexCache * __cdecl Ptex::v2_3::PtexCache::create(int,unsigned __int64,bool,class Ptex::v2_3::PtexInputHandler *,class Ptex::v2_3::PtexErrorHandler *)"
+ (__imp_?create@PtexCache@v2_3@Ptex@@SAPEAV123@H_K_NPEAVPtexInputHandler@23@PEAVPtexErrorHandler@23@@Z)
+ referenced in function "protected: virtual void __cdecl pxrInternal_v0_21__pxrReserved__::HdStPtexTextureObject::_Load(void)" (?_Load@HdStPtexTextureObject@pxrInternal_v0_21__pxrReserved__@@MEAAXXZ)
+ [...\build\pxr\imaging\hdSt\hdSt.vcxproj]
+```
+(TODO: find way to specify use of static libraries)
+
+Using the shared libraries removes the error and allow the build process to continue.
+
+
+### Metal
+
+For MacOS builds, not relevant here.
+
+
+### Vulkan
+
+for 'hgiVulkan'?
+(PXR_BUILD_GPU_SUPPORT or PXR_ENABLE_VULKAN_SUPPORT is OFF)
+
+
+----
+
+# Additional libraries
+
+The build process will download and build the required libraries.
+(TODO: or build manually? how to provide?)
+
+
+## Zlib
+
+(TODO: link to OIIO/zlib?)
+
+
+----
+
+# Tests
+
+(TODO: see which tests should make)
+
+-- Skipping validation of gf generated code because PXR_VALIDATE_GENERATED_CODE=OFF
+-- Skipping validation of sdf generated code because PXR_VALIDATE_GENERATED_CODE=OFF
+-- Skipping alembic-based usddiff tests because PXR_BUILD_ALEMBIC_PLUGIN=OFF
+-- Skipping Draco-based usddiff tests because PXR_BUILD_DRACO_PLUGIN=OFF
+-- Skipping usdedit tests, could not find sed command.
+
+
+
+
+
+----
+
+# BUILD
+
+
+build options:
+
+How to set these options?
+* Shared or static libraries:
+--build-shared (default Shared)
+* Debug or release:
+--debug (default: Release)
+* 32 vs 64 bits
+(might not have 32 bits?)
+
+
+
+
+BUILD COMMAND:
+(! - Must be connected to Internet (?))
+
+python <PATH_TO_USD_RELEASE>\build_scripts\build_usd.py <INSTALL_PATH> --verbose --python --usd-imaging --ptex --openvdb --usdview --embree --prman --openimageio --opencolorio --alembic --draco --materialx
+
+Example:
+python c:\Users\default\Documents\usd_setup\USD-release\build_scripts\build_usd.py "C:\Users\default\Documents\usd\usd_build" --verbose --python --usd-imaging --ptex --openvdb --usdview --embree --prman --openimageio --opencolorio --alembic --draco --materialx
+
+
+"Dry-run", to check before making the build:
+python <PATH_TO_USD_RELEASE>\build_scripts\build_usd.py <INSTALL_PATH> --dry_run --verbose --python --usd-imaging --ptex --openvdb --usdview --embree --prman --openimageio --opencolorio --alembic --draco --materialx
+
+----
+
+COMMAND ARGUMENTS:
+(in parenthesis are set by default)
+
+Optional:
+  --dry_run
+  --verbose 3
+
+Build:
+!?
+  --build-args
+    => need specific args?
+  --force-all
+    => Try install to have everything
+
+USD
+  (--build-shared)
+  ?
+  --debug
+  ?
+  --tests
+    => to validate?
+  (later)
+  --no-examples
+  --no-turorials
+    => if want "light/clean" install
+  (--tools)
+  --docs
+    => should build it?
+  (--python)
+  (--prefer-safety-over-speed)
+
+!
+Imaging and USD Imaging:
+  (--usd-imaging)
+  --ptex
+  --openvdb
+  (--usdview)
+
+!
+Imaging:
+  --embree
+  --prman
+  --openimageio
+  --opencolorio
+
+!
+Alembic:
+  --alembic
+  ?
+  --hdf5
+    => If not, uses Ogawa? Or if allow have both?
+
+!
+Draco:
+  --draco
+!
+MaterialX:
+  --materialx
+
+
+Try with:
+--force-all
+
+
+
+Summary (script):
+```
+set PYTHON_PATH=C:\Users\2-REC\AppData\Local\Programs\Python\Python37
+
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+set PATH=%PYTHON_PATH%;%PATH%
+set PATH=%PYTHON_PATH%\Scripts;%PATH%
+set PATH=C:\ProgramData\nasm;%PATH%
+
+# For PySide2
+set PATH=%PYTHON_PATH%\Lib\site-packages;%PATH%
+
+python c:\Users\2-REC\Documents\usd_setup\USD-release\build_scripts\build_usd.py "C:\Users\2-REC\Documents\usd\usd_build" --verbose --python --usd-imaging --ptex --openvdb --usdview --embree --prman --openimageio --opencolorio --alembic --draco --materialx
+```
+
+
+## Warnings
+
+(TODO: move below?)
+
+Error during build, but seems normal, to be ignored:
+```
+TestPlugDsoUnloadable.obj : error LNK2019: unresolved external symbol
+ "int __cdecl Unresolved_external_symbol_error_is_expected_Please_ignore(void)" (?Unresolved_external_symbol_error_is_expected_Please_ignore@@YAHXZ)
+ referenced in function "void __cdecl pxrInternal_v0_21__pxrReserved__::`dynamic initializer for 'something''(void)" (??__Esomething@pxrInternal_v0_21__pxrReserved__@@YAXXZ)
+ [...\build\pxr\base\plug\TestPlugDsoUnloadable.vcxproj]
+...\build\pxr\base\plug\Release\TestPlugDsoUnloadable.dll : warning LNK4088: image being generated due to /FORCE option; image may not run [...\build\pxr\base\plug\TestPlugDsoUnloadable.vcxproj]
+```
+
+----
+
+# RUN
+
+SET PATHS! (for each dll: opensubdiv, tbb, boost, ptex?, zlib)
++ python (PyOpenGL, PySide2)
++ ADD runtime libs
+
+
+## Runtime Errors
+
+```
+ERROR: Usdview encountered an error while rendering.No module named 'OpenGL'
+```
+=> Need PyOpenGL
+
+
+-------------
+
+!!!!
+- Python Versions and DCC Plugins:
+Some DCCs (most notably, Maya) may ship with and run using their own version of
+Python. In that case, it is important that USD and the plugins for that DCC are
+built using the DCC's version of Python and not the system version. This can be
+done by running build_usd.py using the DCC's version of Python.
+!!!!
+=> Build DCC plugins on machine with DCC installed.
+(eg: for Maya, can use 'mayapy')
+

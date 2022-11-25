@@ -1,0 +1,236 @@
+
+TO READ/CHECK:
+https://graphics.pixar.com/usd/docs/USD-Toolset.html
+https://graphics.pixar.com/usd/docs/USD-3rd-Party-Plugins.html
+
+LOOK AT:
+- How to build maya USD
+  => Two great sources on how to build the Pixar and Animal Logic USD plugins for Maya.
+  https://discourse.techart.online/t/how-to-build-usd/12227
+  (outdated?)
+  + CHECK THE COOKBOOK!
+    https://discourse.techart.online/t/how-to-build-usd/12227
++
+https://polycount.com/discussion/210698/building-pixars-usd-for-maya
+
+
+
+TO TEST:
+Can find prebuilt binaries in Pypi package
+(what about the dependencies?)
+https://pypi.org/project/usd-core/
+
+
+
+++++
+(
+merge/check with rest:
+Download + install VS2019 Community edition (free, just need a MS account)
+Components:
+- Desktop dev c++  (TODO: add details!)
+- Python dev (TODO: add details!)
+
+Download Boost
+https://www.boost.org/users/history/version_1_76_0.html
++Install (need to build? or headers are enough?)
+https://www.boost.org/doc/libs/1_66_0/more/getting_started/windows.html
+"To compile anything in Boost, you need a directory containing the boost\ subdirectory in your #include path. "
+)
+++++
+
+
+
+
+
+
+---------------------------------
+
+DOC PAGES:
+- USD
+- Boost
+- TBB?
+- OpenSubDiv?
+- OpenEXR
+- OpenImageIO
+- OpenColorIO
+
+
+LIBRARIES
+
+- USD
+  - Ptex
+  - OpenVDB
+  - (PRMan)
+  - (Draco)
+  - (MaterialX)
+  - OpenImageIO
+  - OpenColorIO
+  - Alembic
+  - OSL
+  - zlib
+  - boost
+  - TBB
+  - OpenSubdiv
+  - PyOpenGL
+  - HDF5
+  - Python 3
+
+- Alembic
+  - OpenEXR
+
+- OSL
+
+* OIIO
+  Reuired:
+  * OpenEXR/Imath >= 2.0 (recommended: 2.2 or higher; tested through 3.1)
+    !? => check lib+version
+  * libTIFF >= 3.9 (recommended: 4.0+; tested through 4.3)
+  * Boost 1.73
+
+  (TODO: check if required)
+  * BZip2
+  * FreeType
+
+  Optional:
+  * for iv viewer:
+    * Qt 5.15
+    * OpenGL
+  * for Python bindings (or testsuite):
+    * Python 3.7.9
+    * pybind11 2.6.1
+    * NumPy
+  * for camera "RAW" formats support:
+    *  LibRaw (version?)
+  * for video formats support:
+    * ffmpeg >= 3.0
+  * for jpeg 2000 images:
+    * OpenJpeg >= 2.0 (tested through 2.4)
+x  * for Field3D files:
+    * Field3D (tested through 1.7.3)
+  * for OpenVDB files:
+    * OpenVDB >= 5.0 (tested through 8.0)
+    * Intel TBB >= 2018 (tested through 2021)
+  * for OpenCV data structures, or for capturing images from a camera:
+    * OpenCV 3.x, or 4.x (tested through 4.5)
+  * for GIF images:
+    * giflib >= 4.1 (tested through 5.2; 5.0+ is strongly recommended for stability and thread safety)
+  * for HEIF/HEIC or AVIF images:
+    * libheif >= 1.3 (1.7 required for AVIF support, tested through 1.11)
+      * with AV1 encoder/decoder for AVIF support.
+  * for DDS files:
+    * libsquish >= 1.13 (tested through 1.15)
+      => Can be built automatically (?)
+  * for DICOM medical image files:
+    * DCMTK >= 3.6.1 (tested through 3.6.5)
+  * for WebP images:
+    * WebP >= 0.6.1 (tested through 1.1.0)
+  * for OpenColorIO color transformations:
+    * OpenColorIO 1.1 or 2.0
+  * for Ptex:
+    * Ptex >= 2.3.1 (probably works for older; tested through 2.4.0)
+  * for XML parsing:
+    * PugiXML >= 1.8
+      => Can be built automatically (?)
+        Or provide own with "-DUSE_EXTERNAL_PUGIXML=1" ... (?)
+
+
+
+
+
+* OCIO
+  Automatic builds:
+  * expat 2.2.8
+  * yaml-cpp 0.6.3
+  * pystring 1.1.3
+  * lcms2 2.2
+  * pybind11 2.6.1
+  Separate builds:
+  * Python 3.7.9
+  * Half (OpenEXR) 2.4.0
+    !? => check lib+version
+  * OpenImageIO 2.1.9 (optional)
+
+
+- OpenCV
+
+- Qt 5.15
+
+- Boost 1.73
+  - Python (optional)
+
+- Python 3.7.9
+
+
+----------
+
+USD
+
+https://github.com/PixarAnimationStudios/USD
+
+
+Advanced build config:
+https://github.com/PixarAnimationStudios/USD/blob/release/BUILDING.md
+
+Common:
+- Python
+  - Python 2.7 (.16?)
+  - Python 3.7 (try with same as Pype3 - 3.7.8)
+=> Build USD for both Python2 and Python3...
+
+
+USD
+=> Windows (TODO: later do for linux as well - don't have Mac...)
+
+Required:
+- C++ compiler
+  => Microsoft Visual Studio 2019
+    - If not ok, try "MSVC v140 - VS 2015" (installable from VS2019)
+- C compiler
+  => Included in VS2019 (with MSVC)
+- CMake
+  => Included in VS2019 with "C++ CMake tools for Windows"
+  - version?
+- Boost
+! - TODO: check with above (version?)!
+  => Downloaded + installed by USD (?)
+  https://www.boost.org/doc/libs/1_66_0/more/getting_started/windows.html#build-from-the-visual-studio-ide
+- Intel TBB
+  => Downloaded + installed by USD (?)
+Optional:
+- Python (required for bindings and tests)
+
+Imaging and USD Imaging
+Required:
+- OpenSubdiv
+  => Downloaded + installed by USD (?)
+- NASM (on Windows)
+  ! => To install manually
+  https://www.nasm.us/
+  https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/
+  https://www.stefanobordoni.cloud/howto-integrate-nasm-with-vs2019/
+
+Optional:
+- OpenEXR
+  => Downloaded + installed by USD (?)
+- OpenImageIO
+  => Downloaded + installed by USD (?)
+- OpenColorIO
+  => Downloaded + installed by USD (?)
+- OSL (OpenShadingLanguage)
+  => Optional (untested Windows?)
+  https://github.com/AcademySoftwareFoundation/OpenShadingLanguage/blob/master/INSTALL.md
+    => Not used?
+      'In the (not-too-distant) future, it will contain "oso" files that provide OSL implementations of the Usd* shaders.'
+      https://graphics.pixar.com/usd/docs/api/usd_shaders_page_front.html
+
+- Ptex
+  => Downloaded + installed by USD (?)
+
+usdview
+Required:
+- PySide or PySide2
+  ! => To install manually (PyPi)
+- PyOpenGL
+  ! => To install manually (PyPi)
+
+

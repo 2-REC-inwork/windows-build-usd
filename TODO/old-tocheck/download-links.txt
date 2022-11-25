@@ -1,0 +1,82 @@
+
+1.5.1.zip
+- libjpeg Turbo
+- from
+  https://github.com/libjpeg-turbo/libjpeg-turbo/archive/1.5.1.zip
+
+1.7.10.zip
+- alembic
+- from
+  https://github.com/alembic/alembic/archive/1.7.10.zip
+
+boost_1_70_0.tar.gz
+- Boost
+- from
+  https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/
+  (sourceforge problem
+    https://downloads.sourceforge.net/project/boost/boost/1.70.0/boost_1_70_0.tar.gz
+  )
+
+libpng-1.6.29.tar.gz
+- libpng
+- from
+  https://github.com/glennrp/libpng-releases/releases/tag/libpng-1.6.29-signed
+  (sourceforge problem
+    https://downloads.sourceforge.net/project/libpng/libpng16/older-releases/1.6.29/libpng-1.6.29.tar.gz
+  )
+
+master.zip
+- Draco
+- from
+  https://github.com/google/draco/archive/master.zip
+
+Release-2.1.16.0.zip
+- OpenImageIO
+- from
+  https://github.com/OpenImageIO/oiio/archive/Release-2.1.16.0.zip
+
+tbb2017_20170412oss_win.zip
+- TBB
+- from
+  https://github.com/oneapi-src/oneTBB/releases/download/2017_U6/tbb2017_20170412oss_win.zip
+
+tiff-4.0.7.zip
+- libtiff
+- from
+  https://download.osgeo.org/libtiff/tiff-4.0.7.zip to C:\Users\2-REC\Documents\usd\usd_build\src\
+
+v1.2.11.zip
+- zlib
+- from
+  https://github.com/madler/zlib/archive/v1.2.11.zip
+
+v1.17.0.zip
+- Blosc
+- from
+  https://github.com/Blosc/c-blosc/archive/v1.17.0.zip
+
+v1.38.0.zip
+- MaterialX
+- from
+  https://github.com/materialx/MaterialX/archive/v1.38.0.zip
+
+v2.1.28.zip
+- PTex
+- from
+  https://github.com/wdas/ptex/archive/v2.1.28.zip
+
+v2.2.0.zip
+- OpenEXR
+- from
+  https://github.com/openexr/openexr/archive/v2.2.0.zip
+
+v3_4_3.zip
+- OpenSubbdiv
+- from
+  https://github.com/PixarAnimationStudios/OpenSubdiv/archive/v3_4_3.zip
+
+v6.1.0.zip
+- OpenVDB
+- from
+  https://github.com/AcademySoftwareFoundation/openvdb/archive/v6.1.0.zip
+
